@@ -42,4 +42,4 @@
 
 
 
-## [kubernetes](kubernetes/README.MD)
+## [kubernetes](kubernetes/kubernetes.md)
