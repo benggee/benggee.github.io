@@ -136,3 +136,50 @@ EOF
 --image-repository registry.aliyuncs.com/google_containers  \
 --service-cidr=10.10.0.0/16 --pod-network-cidr=10.0.0.0/16
 ```
+
+看到下面的输出说明初始化成功了
+
+```shell
+....
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.0.220:6443 --token 4qmsl0.vzecfcke47164729 \
+    --discovery-token-ca-cert-hash sha256:c600b7a3562d486e60decb346a12d43182a8c08caf75b24fc630f5893a04970f
+```
+
+然后按照提示操作
+
+```shell
+> mkdir -p $HOME/.kube
+> sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+> sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+
+
+## 5. 安装calico网络
+
+```shell
+> kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+```
+
+
+
+## 6. 安装Dashboard
+
+```shell
+> kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+```
+
