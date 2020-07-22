@@ -128,6 +128,15 @@ EOF
 > systemctl daemon-reload
 > systemctl restart docker
 ```
+如果遇到如下问题
+``` 
+package docker-ce-3:19.03.12-3.el7.x86_64 requires containerd.io >= 1.2.2-3, but none of the providers can be installed
+```
+
+``` 
+> wget https://download.docker.com/linux/centos/7/x86_64/edge/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+> yum install containerd.io-1.2.6-3.3.el7.x86_64.rpm
+```
 
 初始化kerbunetes集群
 ``` shell
