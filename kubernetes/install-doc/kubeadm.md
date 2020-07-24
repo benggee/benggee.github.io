@@ -112,7 +112,7 @@ EOF
 
 ## 4. 安装docker
 
-Dcoker的安装可以查看 [CentOS下的Docker安装](../../docker/installmd)
+Dcoker的安装可以查看 [CentOS下的Docker安装](../../docker/install.md)
 
 
 ## 5. 初始化kerbunetes集群
