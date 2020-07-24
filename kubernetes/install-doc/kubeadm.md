@@ -25,19 +25,19 @@
 Master 192.168.0.220 
 
 ```shell
-> hostnamectl set-hostname master
+[root@master ~]# hostnamectl set-hostname master
 ```
 
 Node01 192.168.0.221
 
 ```shell
-> hostnamectl set-hostname node01
+[root@master ~]# hostnamectl set-hostname node01
 ```
 
 Node02 192.168.0.222
 
 ```shell
-> hostnamectl set-hostname node02
+[root@master ~]# hostnamectl set-hostname node02
 ```
 
 
@@ -45,7 +45,7 @@ Node02 192.168.0.222
 ### 2.2. 设置置/etc/hosts
 
 ```shell
-> vi /etc/hosts
+[root@master ~]# vi /etc/hosts
 ```
 
 ```shell
@@ -62,13 +62,13 @@ Node02 192.168.0.222
 初始化环境
 
 ```shell
-> setenforce 0  
-> yum install vim bash-completion net-tools gcc -y
-> yum install -y yum-utils device-mapper-persistent-data lvm2
+[root@master ~]# setenforce 0  
+[root@master ~]# yum install vim bash-completion net-tools gcc -y
+[root@master ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
 ```
 或者
 ```shell
-> vi /etc/sysconfig/selinux  
+[root@master ~]# vi /etc/sysconfig/selinux  
 ```
 
 设置SELINUX=disabled（永久关闭）
@@ -76,35 +76,35 @@ Node02 192.168.0.222
 设置阿里去镜像
 
 ```shell
-> cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF
+[root@master ~]# cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+                            [kubernetes]
+                            name=Kubernetes
+                            baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+                            enabled=1
+                            gpgcheck=1
+                            repo_gpgcheck=1
+                            gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+                        EOF
 ```
 
 安装并设置开机启动
 ```shell 
-> yum install -y kubelet kubeadm kubectl
-> systemctl enable kubelet && systemctl start kubelet
+[root@master ~]# yum install -y kubelet kubeadm kubectl
+[root@master ~]# systemctl enable kubelet && systemctl start kubelet
 ```
 
 关闭交换分区
 ``` shell 
-> swapoff -a   
+[root@master ~]# swapoff -a   
 ```
 或者永久关闭
 ``` shell
-> sed -ri 's/.*swap.*/#&/' /etc/fstab
+[root@master ~]# sed -ri 's/.*swap.*/#&/' /etc/fstab
 ```
 
 设置k8s内核参数
 ``` shell
-> cat > /etc/sysctl.d/k8s.conf <<EOF
+[root@master ~]# cat > /etc/sysctl.d/k8s.conf <<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
@@ -112,43 +112,21 @@ EOF
 
 ## 4. 安装docker
 
+Dcoker的安装可以查看 [CentOS下的Docker安装](../../docker/installmd)
+
+
+## 5. 初始化kerbunetes集群
 ``` shell
-# 设置阿里云源
-> yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-# 安装docker 
-> yum -y install docker-ce
-# 修改
-> mkdir -p /etc/docker
-> tee /etc/docker/daemon.json <<-'EOF'
-{
-  "registry-mirrors": ["https://fl791z1h.mirror.aliyuncs.com"]
-}
-EOF
-
-> systemctl daemon-reload
-> systemctl restart docker
-```
-如果遇到如下问题
-``` 
-package docker-ce-3:19.03.12-3.el7.x86_64 requires containerd.io >= 1.2.2-3, but none of the providers can be installed
-```
-
-``` 
-> wget https://download.docker.com/linux/centos/7/x86_64/edge/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
-> yum install containerd.io-1.2.6-3.3.el7.x86_64.rpm
-```
-
-初始化kerbunetes集群
-``` shell
-> kubeadm init --kubernetes-version=1.18.0  \
---apiserver-advertise-address=192.168.0.220   \
---image-repository registry.aliyuncs.com/google_containers  \
---service-cidr=10.10.0.0/16 --pod-network-cidr=10.0.0.0/16
+[root@master ~]# kubeadm init --kubernetes-version=1.18.0  \
+                              --apiserver-advertise-address=192.168.0.220   \
+                              --image-repository registry.aliyuncs.com/google_containers  \
+                              --service-cidr=10.10.0.0/16 --pod-network-cidr=10.0.0.0/16
 ```
 
 看到下面的输出说明初始化成功了
 
 ```shell
+[root@master ~]# 
 ....
 Your Kubernetes control-plane has initialized successfully!
 
@@ -166,29 +144,37 @@ Then you can join any number of worker nodes by running the following on each as
 
 kubeadm join 192.168.0.220:6443 --token 4qmsl0.vzecfcke47164729 \
     --discovery-token-ca-cert-hash sha256:c600b7a3562d486e60decb346a12d43182a8c08caf75b24fc630f5893a04970f
-```
+
+[root@master ~]# 
+```    
 
 然后按照提示操作
 
 ```shell
-> mkdir -p $HOME/.kube
-> sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-> sudo chown $(id -u):$(id -g) $HOME/.kube/config
+[root@master ~]# mkdir -p $HOME/.kube
+[root@master ~]# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+[root@master ~]# sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-
-
-## 5. 安装calico网络
+## 6. 安装calico网络
 
 ```shell
-> kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+[root@master ~]# kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 ```
 
+## 7. 将从节点加入到集群中
 
+这里依赖上一步master节点初始化之后的token   
 
-## 6. 安装Dashboard
+```shell 
+[root@master ~]# kubeadm join 192.168.0.220:6443 --token 4qmsl0.vzecfcke47164729 \
+    --discovery-token-ca-cert-hash sha256:c600b7a3562d486e60decb346a12d43182a8c08caf75b24fc630f5893a04970f
+
+```
+
+## 8. 安装Dashboard
 
 ```shell
-> kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+[root@master ~]# kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
 ```
 
