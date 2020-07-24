@@ -31,13 +31,13 @@ Master 192.168.0.220
 Node01 192.168.0.221
 
 ```shell
-[root@master ~]# hostnamectl set-hostname node01
+[root@node01 ~]# hostnamectl set-hostname node01
 ```
 
 Node02 192.168.0.222
 
 ```shell
-[root@master ~]# hostnamectl set-hostname node02
+[root@node02 ~]# hostnamectl set-hostname node02
 ```
 
 
