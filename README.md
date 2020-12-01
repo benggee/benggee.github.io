@@ -36,10 +36,34 @@
 
 ## 操作系统
 
+#### 网络配置
 
+- [CentOS网络配置](/linux/centos-network-setting.md)
+
+#### Shell编程
+
+- [Syntax](/linux/shell-syntax.md)
+- [MySQL Check](/linux/shell-mysql-check.md)
+- [Nginx Monitor](/linux/shell-nginx-monitor.md)
 
 ## 数据库的魅力
 
+#### 配置攻略
+
+- [高可用配置](/mysql/my-cnf.md)
+
+#### 数据库Check SQL
+
+- [慢SQL分析](/mysql/slow-select.md)
+- [死锁分析](/mysql/deadlock-check.md)
+
+#### SQL Syntax
+
+
+
+#### 高可用
+
+- [双master架构](/mysql/double-master.md)
 
 ## Kubernetes
 
