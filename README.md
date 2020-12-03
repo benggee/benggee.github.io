@@ -44,11 +44,9 @@
 
 ## 操作系统
 
-#### 网络配置
+#### [网络配置](/linux/network.md)
 
-- [CentOS网络配置](/linux/centos-network-setting.md)
-
-#### Shell编程
+#### [Shell编程](/linux/shell.md)
 
 - [Syntax](/linux/shell-syntax.md)
 - [MySQL Check](/linux/shell-mysql-check.md)
@@ -58,7 +56,7 @@
 
 ## MySQL
 
-#### 配置攻略
+#### [配置攻略](/mysql/setting.md)
 
 - [高可用配置](/mysql/my-cnf.md)
 
