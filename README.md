@@ -4,27 +4,21 @@
 
 ## 数据结构与算法
 
-#### 1.线性数据结构
+#### [线性数据结构](/data-struct/line.md)
 
-- [数组 Array](data-struct/array.md)
-- [链表 LinkList](data-struct/linklist.md)
-- [映射 Map](data-struct/map.md)
-- [集合 Set](data-struct/set.md)
-- [哈希表 Hash](data-struct/hash.md)
-- [队列 Queue](data-struct/queue.md)
-- [堆栈（栈）Stack](data-struct/stack.md)
+#### [树形数据结构](/data-struct/tree.md)
 
-#### 2.树
+#### [图论](/data-struct/graph.md)
 
-#### 3.图
+#### [基本排序](/data-struct/base-sort.md)
 
-#### 4.基本排序
+#### [归并排序](/data-struct/guibing-sort.md)
 
-#### 5.归并排序
+#### [快速排序](/data-struct/quick-sort.md)
 
-#### 6.快速排序
+#### [堆排序](/data-struct/heap-sort.md)
 
-#### 7.堆排序
+
 
 ## 网络与协议
 
