@@ -1,3 +1,4 @@
+# Vim配置
 
 ```
 set enc=utf-8
@@ -26,3 +27,4 @@ if has('mouse')
     endif
 endif
 ```
+
