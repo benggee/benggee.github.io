@@ -42,10 +42,6 @@
 
 #### [Shell编程](/linux/shell.md)
 
-- [Syntax](/linux/shell-syntax.md)
-- [MySQL Check](/linux/shell-mysql-check.md)
-- [Nginx Monitor](/linux/shell-nginx-monitor.md)
-
 ## 数据库
 
 ## MySQL
