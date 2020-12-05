@@ -48,6 +48,8 @@
 
 #### [进程管理](/linux/proccesser.md)
 
+[Grub配置](/linux/grub.md)
+
 
 
 ## 数据库
