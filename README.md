@@ -42,6 +42,14 @@
 
 #### [Shell编程](/linux/shell.md)
 
+#### [软件包管理](/linux/soft-install.md)
+
+#### [内核安装/升级](/linux/kernel.md)
+
+#### [进程管理](/linux/proccesser.md)
+
+
+
 ## 数据库
 
 ## MySQL
