@@ -48,7 +48,7 @@
 
 #### [进程管理](/linux/proccesser.md)
 
-[Grub配置](/linux/grub.md)
+#### [Grub配置](/linux/grub.md)
 
 
 
