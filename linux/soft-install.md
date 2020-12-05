@@ -1,6 +1,6 @@
-RPM安装
+# RPM安装
 
-prm常用参数
+#### prm常用参数
 
 -q 查询软件包
 
@@ -33,7 +33,7 @@ prm常用参数
 
 ```
 
-YUM安装
+# YUM安装
 
 源地址：
 
@@ -99,7 +99,7 @@ CentOS 8
 # yum grouplist 
 ```
 
-源代码安装
+# 源代码安装
 
 ```shell
 # ./configure --prefix=/xx/xx

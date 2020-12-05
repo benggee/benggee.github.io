@@ -1,4 +1,4 @@
-RPM格式内核
+# RPM格式内核
 
 查看内核版本
 
@@ -20,9 +20,9 @@ RPM格式内核
 
 
 
-源代码编译安装内核
+# 源代码编译安装内核
 
-安装依赖
+### 安装依赖
 
 ```shell
 # yum install gcc gcc-c++ make ncurses-devel openssl-devel elfutils-libelf-devel
@@ -36,7 +36,7 @@ RPM格式内核
 
 
 
-下载并解压内核
+### 下载并解压内核
 
 https://www.kernel.org
 
@@ -44,7 +44,7 @@ https://www.kernel.org
 # tar xvf linux-5.1.10.tar.xz -C /usr/src/kernels
 ```
 
-配置内核编译参数
+### 配置内核编译参数
 
 ```shell
 # cd /usr/src/kernels/linux-5.1.10/
@@ -68,7 +68,7 @@ https://www.kernel.org
 # make -j2 all  // all表示所有的都要安装
 ```
 
-安装内核
+### 安装内核
 
 ```shell
 # make modules_install
