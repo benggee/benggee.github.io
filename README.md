@@ -56,6 +56,8 @@
 
 #### [SELinux](/linux/selinux.md)
 
+#### [CMake安装](/linux/cmake-install.md)
+
 
 
 ## 数据库
