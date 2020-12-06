@@ -276,5 +276,7 @@ RAID 10 是RAID 1与RAID 0的结合
 	> p 创建主分区
 	> 输入第一次得到的起始扇区
 	> w
+# reboot
+# resize2fs /dev/mmcblk0p2
 ```
 
