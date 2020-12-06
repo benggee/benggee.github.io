@@ -263,4 +263,18 @@ RAID 10 是RAID 1与RAID 0的结合
    # df -h
    ```
 
-   
+
+
+## 实例1：解决树莓派空间缩水的问题
+
+```shell
+# df -h 
+# cat /sys/block/mmcblk0/mmcblk0p2/start  // 查看第二分区的起始地址，后面分区的时候的起始位置 
+# fdisk /dev/mmcblk0
+	> d 删除分区
+	> n 创建分区
+	> p 创建主分区
+	> 输入第一次得到的起始扇区
+	> w
+```
+
