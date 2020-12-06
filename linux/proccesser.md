@@ -113,3 +113,119 @@ Screen命令可以在终端退出的时候进程不退出，同时可以实时�
 
 /var/log/cron    计划任务相关
 
+
+
+# Service 服务管理
+
+service服务里的1号进程是init
+
+/etc/init.d 
+
+```shell
+# cd /etc/init.d
+# vi network 
+```
+
+上面的network是一个shell脚本，对于其它的服务的也是一样的，在init.d目录下都有一个对应的shell脚本 
+
+可以使用chkconfig --list 来查看启动级别，服务对应的级别的开启状态
+
+```
+注：该输出结果只显示 SysV 服务，并不包含
+原生 systemd 服务。SysV 配置数据
+可能被原生 systemd 配置覆盖。
+
+      要列出 systemd 服务，请执行 'systemctl list-unit-files'。
+      查看在具体 target 启用的服务请执行
+      'systemctl list-dependencies [target]'。
+
+netconsole     	0:关	1:关	2:关	3:关	4:关	5:关	6:关
+network        	0:关	1:关	2:开	3:开	4:开	5:开	6:关
+```
+
+
+
+# Systemctl管理服务
+
+Systemctl里面的1号进程是systemd
+
+/usr/lib/systemd/system/
+
+```shell
+# cd /usr/lib/systemd/system
+# vi ssh.service
+```
+
+常用操作
+
+systemctl start|restart|reload|enable|disable|status
+
+```shell
+# systemctl start ssh.service
+# systemctl stop ssh.service
+# systemctl restart ssh.service
+# systemctl status ssh.service
+```
+
+查看服务级别
+
+```shell
+# ls *.target 
+```
+
+上面可以列出所有runlevel0.target的文件，再进一步
+
+```shell
+# ls -l runlevel*.target
+```
+
+结果如下：
+
+```
+lrwxrwxrwx. 1 root root 15 11月 25 00:01 runlevel0.target -> poweroff.target
+lrwxrwxrwx. 1 root root 13 11月 25 00:01 runlevel1.target -> rescue.target
+lrwxrwxrwx. 1 root root 17 11月 25 00:01 runlevel2.target -> multi-user.target
+lrwxrwxrwx. 1 root root 17 11月 25 00:01 runlevel3.target -> multi-user.target
+lrwxrwxrwx. 1 root root 17 11月 25 00:01 runlevel4.target -> multi-user.target
+lrwxrwxrwx. 1 root root 16 11月 25 00:01 runlevel5.target -> graphical.target
+lrwxrwxrwx. 1 root root 13 11月 25 00:01 runlevel6.target -> reboot.target
+```
+
+对应来看
+
+runlevel0.target  ->  poweroff.target       对应init里的0    关机
+
+runlevel1.target   ->  rescue.target          对应init里的1 
+
+runlevel2.target   -> multi-user.target      对应init里的2
+
+runlevel3.target   -> multi-user.target      对应init里的3
+
+runlevel4.target   -> multi-user.target     对应init里的4
+
+runlevel5.target   -> graphical.target      对应init里的5    图形级别
+
+runlevel6.target   -> reboot.target          对应init里的6     重启
+
+ 查看当前系统运行在哪个级别
+
+```shell
+# systemctl get-default
+```
+
+设置默认启动级别
+
+```shell
+# systemctl set-default  multi-user.target
+```
+
+解决服务启动的依赖顺序
+
+假如ssh.service启动依赖我们自己的一个服务a.service，我们可以进入到/usr/lib/systemd/system
+
+```shell
+# vi ssh.service  
+```
+
+然后在[util]一栏里的After增加a.service，增加一行Requires=a.service
+
