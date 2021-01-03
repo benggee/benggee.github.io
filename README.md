@@ -58,7 +58,7 @@
 
 #### [CMake安装](/linux/cmake-install.md)
 
-
+#### [文本处理](./linux/text-handle.md)
 
 ## 数据库
 
