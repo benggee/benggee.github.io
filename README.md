@@ -32,7 +32,7 @@
 
 ## 编程语言逻辑
 
-## Golang
+## [Python](./programing-language/python/readme.md)
 
 
 
