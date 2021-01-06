@@ -64,28 +64,7 @@
 
 ## MySQL
 
-#### [配置攻略](/mysql/setting.md)
-
-- [高可用配置](/mysql/my-cnf.md)
-
-#### 数据库Check SQL
-
-- [慢SQL分析](/mysql/slow-select.md)
-- [死锁分析](/mysql/deadlock-check.md)
-
-#### SQL Syntax
-
-#### 高可用
-
-- [双master架构](/mysql/double-master.md)
-
-## MongoDB
-
-
-
-## Redis
-
-
+#### [死锁问题](./mysql/dead-lock.md)
 
 ## Kubernetes
 
@@ -97,8 +76,6 @@
 ## Docker
 
 ### [Install](docker/install.md)
-
-### [Effective Docker](docker/effective-docker.md)
 
 ### [Dockerfile](docker/dockerfile.md)
 
