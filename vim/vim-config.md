@@ -2,6 +2,7 @@
 
 ```
 set enc=utf-8
+set tabstop=4 
 // 不兼容vi
 set nocompatible 
 // 加载vim默认配置
