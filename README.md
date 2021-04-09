@@ -64,7 +64,7 @@
 
 ## MySQL
 
-#### [死锁问题](./mysql/dead-lock.md)
+#### [用户管理](./mysql/user-manage.md)
 
 ## Kubernetes
 
