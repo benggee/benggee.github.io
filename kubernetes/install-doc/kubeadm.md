@@ -178,7 +178,7 @@ $ systemctl enable kubelet && systemctl start kubelet
 ### 1.8 准备配置文件
 
 ```shell
-$ cd ~ && git clone https://gitee.com/pa/kubernetes-ha-kubeadm.git
+$ cd ~ && git clone https://github.com/seepre/kubernetes-kubeadm.git
 # 看看git内容
 $ ls -l kubernetes-ha-kubeadm
 addons/
@@ -254,7 +254,7 @@ $ find target/ -type f
 
 ## 2. 集群部署
 
-### 2.1 部署keepalived-apiserver高可用（阿里云不支持，可以跳过些步骤）
+### 2.1 部署keepalived-apiserver高可用（阿里云不支持，可以跳过此步骤）
 
 #### 2.1.1 安装keepalived
 
@@ -513,6 +513,8 @@ $ ADMIN_SECRET=$(kubectl get secrets -n kube-system | grep dashboard-admin | awk
 # 打印secret的token
 $ kubectl describe secret -n kube-system ${ADMIN_SECRET} | grep -E '^token' | awk '{print $2}'
 ```
+
+我安装在192.168.1.220机器上，输入以下地址访问Dashboard
 
 https://192.168.1.220:30005/#!/service?namespace=default
 
