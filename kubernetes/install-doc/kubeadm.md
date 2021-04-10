@@ -1,180 +1,518 @@
 # Kubeadm安装k8s集群
 
-## 1. 环境说明
+## 1. 环境准备
 
 #### 机器配置
 
-- 操作系统：centos7
+- 操作系统：centos7.6
 - CPU：2核
-- 内存：4G
+- 内存：2G
 
 #### 机器信息
 
-| 节点名 | IP地址        | Hostname |
-| ------ | ------------- | -------- |
-| Master | 192.168.0.220 | master   |
-| Node01 | 192.168.0.221 | node01   |
-| Node02 | 192.168.0.222 | node02   |
+| 节点名   | IP地址        | Hostname |
+| -------- | ------------- | -------- |
+| Master01 | 192.168.0.220 | m2       |
+| Master02 | 192.168.0.221 | m2       |
+| Node01   | 192.168.0.222 | n1       |
+| Node02   | 192.168.0.223 | n2       |
 
 
 
-## 2. 系统准备
+快捷键  cmmand + shift + i  在iterm中批量运行命令
 
-### 2.1. 设置hostname
-
-Master 192.168.0.220 
-
-```shell
-[root@master ~]# hostnamectl set-hostname master
-```
-
-Node01 192.168.0.221
+### 1.1 设置hostname 
 
 ```shell
-[root@node01 ~]# hostnamectl set-hostname node01
+# 192.168.0.220
+[root@master01 ~]# hostnamectl set-hostname m1
+# 192.168.0.221
+[root@master02 ~]# hostnamectl set-hostname m2
+# 192.168.0.222
+[root@node01 ~]# hostnamectl set-hostname n1
+# 192.168.0.223
+[root@node02 ~]# hostnamectl set-hostname n2
 ```
 
-Node02 192.168.0.222
+
+
+### 1.2 修改host
 
 ```shell
-[root@node02 ~]# hostnamectl set-hostname node02
+# 在4台机器上分别运行
+[root@node02 ~]# vi /etc/hosts
+# 加入如下内容
+192.168.0.220 m1 
+192.168.0.221 m2
+192.168.0.222 n1
+192.168.0.223 n2
 ```
 
-
-
-### 2.2. 设置置/etc/hosts
+### 1.3 安装依赖包
 
 ```shell
-[root@master ~]# vi /etc/hosts
+[root@master01 ~] yum update -y
+[root@master01 ~] yum install -y conntrack ipvsadm ipset jq sysstat curl iptables libseccomp
 ```
+
+### 1.4 关闭防火墙、swap
 
 ```shell
-...
-192.168.0.220  master
-192.168.0.221  node01
-192.168.0.222  node02
+# 关闭防火墙
+$ systemctl stop firewalld && systemctl disable firewalld
+# 重置iptables
+$ iptables -F && iptables -X && iptables -F -t nat && iptables -X -t nat && iptables -P FORWARD ACCEPT
+# 关闭swap
+$ swapoff -a
+$ sed -i '/swap/s/^\(.*\)$/#\1/g' /etc/fstab
+# 关闭selinux
+$ setenforce 0
+# 关闭dnsmasq(否则可能导致docker容器无法解析域名)
+$ service dnsmasq stop && systemctl disable dnsmasq
 ```
 
-
-
-## 3. 安装kubelet、kubeadm、kubectl
-
-初始化环境
+### 1.5 系统参数设置
 
 ```shell
-[root@master ~]# setenforce 0  
-[root@master ~]# yum install vim bash-completion net-tools gcc -y
-[root@master ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
-```
-或者
-```shell
-[root@master ~]# vi /etc/sysconfig/selinux  
-```
-
-设置SELINUX=disabled（永久关闭）
-
-设置阿里去镜像
-
-```shell
-[root@master ~]# cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-                            [kubernetes]
-                            name=Kubernetes
-                            baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-                            enabled=1
-                            gpgcheck=1
-                            repo_gpgcheck=1
-                            gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-                        EOF
-```
-
-安装并设置开机启动
-```shell 
-[root@master ~]# yum install -y kubelet kubeadm kubectl
-[root@master ~]# systemctl enable kubelet && systemctl start kubelet
-```
-
-关闭交换分区
-``` shell 
-[root@master ~]# swapoff -a   
-```
-或者永久关闭
-``` shell
-[root@master ~]# sed -ri 's/.*swap.*/#&/' /etc/fstab
-```
-
-设置k8s内核参数
-``` shell
-[root@master ~]# cat > /etc/sysctl.d/k8s.conf <<EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
+# 制作配置文件
+$ cat > /etc/sysctl.d/kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-iptables=1
+net.bridge.bridge-nf-call-ip6tables=1
+net.ipv4.ip_forward=1
+vm.swappiness=0
+vm.overcommit_memory=1
+vm.panic_on_oom=0
+fs.inotify.max_user_watches=89100
 EOF
+# 生效文件
+$ sysctl -p /etc/sysctl.d/kubernetes.conf
 ```
 
-## 4. 安装docker
-
-Dcoker的安装可以查看 [CentOS下的Docker安装](../../docker/install.md)
 
 
-## 5. 初始化kerbunetes集群
-``` shell
-[root@master ~]# kubeadm init --kubernetes-version=1.18.0  \
-                              --apiserver-advertise-address=192.168.0.220   \
-                              --image-repository registry.aliyuncs.com/google_containers  \
-                              --service-cidr=10.10.0.0/16 --pod-network-cidr=10.0.0.0/16
-```
-
-看到下面的输出说明初始化成功了
+### 1.6 安装Docker
 
 ```shell
-[root@master ~]# 
-....
-Your Kubernetes control-plane has initialized successfully!
+# 配置yum源
+$ yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-To start using your cluster, you need to run the following as a regular user:
+# 清理原有版本
+$ yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine \
+                  container-selinux
 
-  mkdir -p $HOME/.kube
-  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# 查看版本列表
+$ yum list docker-ce --showduplicates | sort -r
 
-You should now deploy a pod network to the cluster.
-Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
-  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+# 根据kubernetes对docker版本的兼容测试情况，我们选择18.09版本
+$ yum install docker-ce-18.09.9 docker-ce-cli-18.09.9 containerd.io
 
-Then you can join any number of worker nodes by running the following on each as root:
+# 开机启动
+$ systemctl enable docker
 
-kubeadm join 192.168.0.220:6443 --token 4qmsl0.vzecfcke47164729 \
-    --discovery-token-ca-cert-hash sha256:c600b7a3562d486e60decb346a12d43182a8c08caf75b24fc630f5893a04970f
+# 设置参数
+# 1.查看磁盘挂载
+$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2        98G  2.8G   95G   3% /
+devtmpfs         63G     0   63G   0% /dev
+/dev/sda5      1015G  8.8G 1006G   1% /tol
+/dev/sda1       197M  161M   37M  82% /boot
 
-[root@master ~]# 
-```    
+# 2.选择比较大的分区（我这里是/tol）如果根分区比较大就不用创建目录了
+$ mkdir -p /tol/docker-data
+$ cat <<EOF > /etc/docker/daemon.json
+{
+    "graph": "/tol/docker-data",   /*这个没有创建目录的情况下可以不配*/
+		"exec-opts": ["native.cgroupdriver=systemd"]
+}
+EOF
 
-然后按照提示操作
+# 启动docker服务
+$ service docker restart
+```
+
+
+
+### 1.7 安装工具
 
 ```shell
-[root@master ~]# mkdir -p $HOME/.kube
-[root@master ~]# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-[root@master ~]# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# 配置yum源（科学上网的同学可以把"mirrors.aliyun.com"替换为"packages.cloud.google.com"）
+$ cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=http://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=http://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+       http://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+
+# 安装工具
+# 找到要安装的版本号
+$ yum list kubeadm --showduplicates | sort -r
+
+# 安装指定版本（这里用的是1.14.0）
+$ yum install kubelet-1.14.0-0 -y && yum install kubectl-1.14.0-0 -y && yum install kubeadm-1.14.0-0 -y
+
+# 设置kubelet的cgroupdriver（kubelet的cgroupdriver默认为systemd，如果上面没有设置docker的exec-opts为systemd，这里就需要将kubelet的设置为cgroupfs）
+# 由于各自的系统配置不同，配置位置和内容都不相同
+# 1. /etc/systemd/system/kubelet.service.d/10-kubeadm.conf(如果此配置存在的情况执行下面命令：)
+$ sed -i "s/cgroup-driver=systemd/cgroup-driver=cgroupfs/g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+# 2. 如果1中的配置不存在，则此配置应该存在(不需要做任何操)：/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+# 启动kubelet
+$ systemctl enable kubelet && systemctl start kubelet
 ```
 
-## 6. 安装calico网络
+
+
+### 1.8 准备配置文件
 
 ```shell
-[root@master ~]# kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+$ cd ~ && git clone https://gitee.com/pa/kubernetes-ha-kubeadm.git
+# 看看git内容
+$ ls -l kubernetes-ha-kubeadm
+addons/
+configs/
+scripts/
+init.sh
+global-configs.properties
 ```
 
-## 7. 将从节点加入到集群中
+#### 文件说明
 
-这里依赖上一步master节点初始化之后的token   
+- **addons**
 
-```shell 
-[root@master ~]# kubeadm join 192.168.0.220:6443 --token 4qmsl0.vzecfcke47164729 \
-    --discovery-token-ca-cert-hash sha256:c600b7a3562d486e60decb346a12d43182a8c08caf75b24fc630f5893a04970f
+> kubernetes的插件，比如calico和dashboard。
 
+- **configs**
+
+> 包含了部署集群过程中用到的各种配置文件。
+
+- **scripts**
+
+> 包含部署集群过程中用到的脚本，如keepalive检查脚本。
+
+- **global-configs.properties**
+
+> 全局配置，包含各种易变的配置内容。
+
+- **[init.sh](http://init.sh/)**
+
+> 初始化脚本，配置好global-config之后，会自动生成所有配置文件。
+
+生成配置
+
+这里会根据大家各自的环境生成kubernetes部署过程需要的配置文件。
+在每个节点上都生成一遍，把所有配置都生成好，后面会根据节点类型去使用相关的配置。
+
+```bash
+# cd到之前下载的git代码目录
+$ cd kubernetes-ha-kubeadm
+
+# 编辑属性配置（根据文件注释中的说明填写好每个key-value）
+$ vi global-config.properties
+
+# 生成配置文件，确保执行过程没有异常信息
+$ ./init.sh
+
+# 查看生成的配置文件，确保脚本执行成功
+$ find target/ -type f
 ```
 
-## 8. 安装Dashboard
+> **执行init.sh常见问题：**
+>
+> 1. Syntax error: “(” unexpected
+>
+> - bash版本过低，运行：bash -version查看版本，如果小于4需要升级
+> - 不要使用 sh init.sh的方式运行（sh和bash可能不一样哦）
+>
+> 1. global-config.properties文件填写错误，需要重新生成
+>    再执行一次./init.sh即可，不需要手动删除target
+
+
+
+注意：
+
+如果是阿里云的机器，需要做以下两件事：
+
+1. global-config.properties里的虚拟Ip配成其中一个master的公网ip就可以了
+2. 设置安全规则，放开端口号
+
+
+
+
+
+## 2. 集群部署
+
+### 2.1 部署keepalived-apiserver高可用（阿里云不支持，可以跳过些步骤）
+
+#### 2.1.1 安装keepalived
+
+```bash
+# 在两个主节点上安装keepalived（一主一备）
+$ yum install -y keepalived
+```
+
+#### 2.1.2 创建keepalived配置文件
+
+```bash
+# 创建目录
+$ ssh <user>@<master-ip> "mkdir -p /etc/keepalived"
+$ ssh <user>@<backup-ip> "mkdir -p /etc/keepalived"
+
+# 分发配置文件
+$ scp target/configs/keepalived-master.conf <user>@<master-ip>:/etc/keepalived/keepalived.conf
+$ scp target/configs/keepalived-backup.conf <user>@<backup-ip>:/etc/keepalived/keepalived.conf
+
+# 分发监测脚本
+$ scp target/scripts/check-apiserver.sh <user>@<master-ip>:/etc/keepalived/
+$ scp target/scripts/check-apiserver.sh <user>@<backup-ip>:/etc/keepalived/
+```
+
+#### 2.1.3 启动keepalived
+
+```bash
+# 分别在master和backup上启动服务
+$ systemctl enable keepalived && service keepalived start
+
+# 检查状态
+$ service keepalived status
+
+# 查看日志
+$ journalctl -f -u keepalived
+
+# 查看虚拟ip
+$ ip a
+```
+
+
+
+### 2.2 部署主节点
 
 ```shell
-[root@master ~]# kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml
+# 准备配置文件
+$ scp target/configs/kubeadm-config.yaml <user>@<node-ip>:~
+# ssh到第一个主节点，执行kubeadm初始化系统（注意保存最后打印的加入集群的命令）
+$ kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
+
+# copy kubectl配置（上一步会有提示）
+$ mkdir -p ~/.kube
+$ cp -i /etc/kubernetes/admin.conf ~/.kube/config
+
+# 测试一下kubectl
+$ kubectl get pods --all-namespaces
+
+# **备份init打印的join命令**
 ```
+
+### 2.3 部署网络插件calico
+
+我们使用calico官方的安装方式来部署。
+
+```bash
+# 创建目录（在配置了kubectl的节点上执行）
+$ mkdir -p /etc/kubernetes/addons
+
+# 上传calico配置到配置好kubectl的节点（一个节点即可）
+$ scp target/addons/calico* <user>@<node-ip>:/etc/kubernetes/addons/
+
+# 部署calico
+$ kubectl apply -f /etc/kubernetes/addons/calico-rbac-kdd.yaml
+$ kubectl apply -f /etc/kubernetes/addons/calico.yaml
+
+# 查看状态
+$ kubectl get pods -n kube-system
+```
+
+### 2.4 加入其它master节点
+
+```shell
+# 使用之前保存的join命令加入集群
+$ kubeadm join ...
+
+# 耐心等待一会，并观察日志
+$ journalctl -f
+
+# 查看集群状态
+# 1.查看节点
+$ kubectl get nodes
+# 2.查看pods
+$ kubectl get pods --all-namespaces
+```
+
+### 2.5 加入Node节点
+
+```shell
+# 使用之前保存的join命令加入集群
+$ kubeadm join ...
+
+# 耐心等待一会，并观察日志
+$ journalctl -f
+
+# 查看节点
+$ kubectl get nodes
+```
+
+
+
+## 3. 集群测试
+
+3.1 集群可用性测试
+
+创建nginx ds (nginx-ds.yml)
+
+```shell
+# 写入配置
+$ cd ~
+$ cat > nginx-ds.yml <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ds
+  labels:
+    app: nginx-ds
+spec:
+  type: NodePort
+  selector:
+    app: nginx-ds
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: nginx-ds
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  template:
+    metadata:
+      labels:
+        app: nginx-ds
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+EOF
+
+# 创建ds
+$ kubectl create -f nginx-ds.yml
+```
+
+检查IP连通性
+
+```shell
+# 检查各 Node 上的 Pod IP 连通性
+$ kubectl get pods  -o wide
+
+# 在每个节点上ping pod ip
+$ ping <pod-ip>
+
+# 检查service可达性
+$ kubectl get svc
+
+# 在每个节点上访问服务
+$ curl <service-ip>:<port>
+
+# 在每个节点检查node-port可用性
+$ curl <node-ip>:<port>
+```
+
+检查dns可用性
+
+```shell
+# 创建一个nginx pod
+$ cat > pod-nginx.yaml <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+    ports:
+    - containerPort: 80
+EOF
+
+# 创建pod
+$ kubectl create -f pod-nginx.yaml
+
+# 进入pod，查看dns
+$ kubectl exec  nginx -i -t -- /bin/bash
+
+# 查看dns配置
+root@nginx:/# cat /etc/resolv.conf
+
+# 查看名字是否可以正确解析
+root@nginx:/# ping nginx-ds
+```
+
+
+
+## 4. 部署Dashboard
+
+创建pod
+
+```shell
+# 上传dashboard配置
+$ scp target/addons/dashboard-all.yaml <user>@<node-ip>:/etc/kubernetes/addons/
+
+# 创建服务
+$ kubectl apply -f /etc/kubernetes/addons/dashboard-all.yaml
+
+# 查看服务运行情况
+$ kubectl get deployment kubernetes-dashboard -n kube-system
+$ kubectl --namespace kube-system get pods -o wide
+$ kubectl get services kubernetes-dashboard -n kube-system
+$ netstat -ntlp|grep 30005
+```
+
+服务https证书配置
+
+```
+为了集群安全，从 1.7 开始，dashboard 只允许通过 https 访问，我们使用nodeport的方式暴露服务，可以使用 https://NodeIP:NodePort 地址访问
+关于自定义证书
+默认dashboard的证书是自动生成的，肯定是非安全的证书，如果大家有域名和对应的安全证书可以自己替换掉。使用安全的域名方式访问dashboard。
+在dashboard-all.yaml中增加dashboard启动参数，可以指定证书文件，其中证书文件是通过secret注进来的。
+
+- –tls-cert-file
+- dashboard.cer
+- –tls-key-file
+- dashboard.key
+```
+
+生成登陆token
+
+Dashboard 默认只支持 token 认证，所以如果使用 KubeConfig 文件，需要在该文件中指定 token，我们这里使用token的方式登录
+
+```bash
+# 创建service account
+$ kubectl create sa dashboard-admin -n kube-system
+
+# 创建角色绑定关系
+$ kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
+
+# 查看dashboard-admin的secret名字
+$ ADMIN_SECRET=$(kubectl get secrets -n kube-system | grep dashboard-admin | awk '{print $1}')
+
+# 打印secret的token
+$ kubectl describe secret -n kube-system ${ADMIN_SECRET} | grep -E '^token' | awk '{print $2}'
+```
+
+https://192.168.1.220:30005/#!/service?namespace=default
 
