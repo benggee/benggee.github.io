@@ -129,13 +129,14 @@ devtmpfs         63G     0   63G   0% /dev
 $ mkdir -p /tol/docker-data
 $ cat <<EOF > /etc/docker/daemon.json
 {
-    "graph": "/tol/docker-data",   /*这个没有创建目录的情况下可以不配*/
-		"exec-opts": ["native.cgroupdriver=systemd"]
+	"graph": "/tol/docker-data",   /*这个没有创建目录的情况下可以不配*/
+	"exec-opts": ["native.cgroupdriver=systemd"]
 }
 EOF
 
 # 启动docker服务
-$ service docker restart
+$ systemctl daemon-reload
+$ systemctl restart docker
 ```
 
 
