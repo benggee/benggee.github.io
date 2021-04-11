@@ -518,4 +518,3 @@ $ kubectl describe secret -n kube-system ${ADMIN_SECRET} | grep -E '^token' | aw
 我安装在192.168.1.220机器上，输入以下地址访问Dashboard
 
 https://192.168.1.220:30005/#!/service?namespace=default
-
