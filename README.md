@@ -10,13 +10,7 @@
 
 #### [图论](/data-struct/graph.md)
 
-#### [基本排序](/data-struct/base-sort.md)
-
-#### [归并排序](/data-struct/guibing-sort.md)
-
-#### [快速排序](/data-struct/quick-sort.md)
-
-#### [堆排序](/data-struct/heap-sort.md)
+#### [排序算法](/data-struct/sort.md)
 
 
 
@@ -68,10 +62,10 @@
 
 ## Kubernetes
 
-### 1.Install
+### Installing
 
-- [Minikube](kubernetes/install-doc/minikube.md)
 - [Kubeadm](kubernetes/install-doc/kubeadm.md)
+- [Ingress](kubernetes/install-doc/ingress.md)
 
 ## Docker
 
