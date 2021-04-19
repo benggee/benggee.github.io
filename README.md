@@ -56,7 +56,7 @@
 
 #### [文本处理](./linux/text-handle.md)
 
-
+[Linux性能优化](./linux/performance)
 
 ## 数据库
 
