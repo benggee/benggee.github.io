@@ -64,6 +64,8 @@
 
 ## MySQL
 
+#### [MySQL双主部署](./mysql/install.md)
+
 #### [用户管理](./mysql/user-manage.md)
 
 ## Kubernetes
