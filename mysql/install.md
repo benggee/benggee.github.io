@@ -371,3 +371,32 @@ Slave_SQL_Running: Yes
 
 
 然后我们将master2配置成master1的主节点，过程和上面是一模一样的。
+
+
+
+## 验证
+
+我们在master1上执行
+
+```mysql
+mysql> create database more;
+```
+
+然后我们在master2上查看
+
+```mysql
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| more               |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.00 sec)
+```
+
+看到，more库已经同步到从节点了，说明部署成功了！
+
