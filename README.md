@@ -68,6 +68,10 @@
 
 #### [用户管理](./mysql/user-manage.md)
 
+# Redis
+
+#### [Cluster部署](redis/install.md)
+
 ## Kubernetes
 
 到目前为止，我所经历过的公司，无一例外全都使用了kubernetes来管理物理或者云资源，在未来它很有可能成为新的基础设施，其google的背景使它的设计思想很先进，毫不夸张的讲，如果未来不会kubernetes可能连工作都找不到。
