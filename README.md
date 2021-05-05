@@ -66,7 +66,13 @@
 
 ## MySQL
 
+#### [MySQL双主部署](./mysql/install.md)
+
 #### [用户管理](./mysql/user-manage.md)
+
+# Redis
+
+#### [Cluster部署](redis/install.md)
 
 ## Kubernetes
 
@@ -83,7 +89,11 @@
 
 ### [Dockerfile](docker/dockerfile.md)
 
-# 我的Vim编辑器实践
+# apollo
+
+#### [使用逻辑](/apollo/usage.md)
+
+# Vim编辑器
 
 #### [README (使用 配置 实践 命令行快捷键)](vim/)
 
