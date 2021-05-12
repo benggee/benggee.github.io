@@ -1,3 +1,12 @@
+## Git配置文件常用配置
+
+```bash
+root% vi ~/.gitconfig
+```
+
+配置文件内容如下
+
+```bash
 [user]
     name = your_name
     email = your_email
@@ -52,3 +61,5 @@
     oldHighlight = red bold 52
     newNormal = green bold
     newHighlight = green bold 22
+```
+
