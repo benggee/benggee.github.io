@@ -568,6 +568,196 @@ echo "It works!"
 ```
 
 
+## 系统CPU使用率很高，找不到高CPU应用
+
+这种情况一般是短时应用导致的问题，可以有以下两种思路：
+
+1. 应用里直接调用了其他二进制程序，这些程序通常运行时间比较短，通过top工具也不容易发现
+2. 应用本身不停的崩溃重启，启动过程可能会占用相当多的CPU
+
+我们可以使用pstree和execsnoop 找到他们的父进程，再从父进程入手。
+
+
+
+### 实验
+
+环境准备：
+
+```bash
+$ apt install docker.io sysstat linux-tools-common apache2-utils
+$ docker run --name nginx -p 10000:80 -itd feisky/nginx:sp
+$ docker run --name phpfpm -itd --network container:nginx feisky/php-fpm:sp
+```
+
+对php-fpm进行压测
+
+```bash
+$ ab -t 5 -t 600 http://192.168.1.226:10000/  # 5个并发 持续5分钟
+```
+
+然后查看cpu负载
+
+```bash
+$top 
+top - 14:07:38 up 10 min,  2 users,  load average: 2.42, 0.91, 0.39
+Tasks: 242 total,   3 running, 188 sleeping,   0 stopped,   0 zombie
+%Cpu0  : 82.1 us, 10.0 sy,  0.0 ni,  6.3 id,  0.0 wa,  0.0 hi,  1.7 si,  0.0 st
+%Cpu1  : 85.3 us,  8.7 sy,  0.0 ni,  5.7 id,  0.0 wa,  0.0 hi,  0.3 si,  0.0 st
+%Cpu2  : 80.4 us, 11.6 sy,  0.0 ni,  7.6 id,  0.0 wa,  0.0 hi,  0.3 si,  0.0 st
+%Cpu3  : 83.1 us, 10.0 sy,  0.0 ni,  7.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem :  3918424 total,  1697448 free,   929496 used,  1291480 buff/cache
+KiB Swap:  2097148 total,  2097148 free,        0 used.  2553288 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 4524 root      20   0   12324   5724   4888 S   4.3  0.1   0:02.56 containerd-shim
+ 4609 systemd+  20   0   33100   3812   2392 S   3.3  0.1   0:02.10 nginx
+ 8085 daemon    20   0  336692  15888   8212 S   3.0  0.4   0:01.35 php-fpm
+ 8067 daemon    20   0  336692  15888   8212 S   2.6  0.4   0:01.35 php-fpm
+ 8071 daemon    20   0  336692  15888   8212 S   2.6  0.4   0:01.34 php-fpm
+ 8073 daemon    20   0  336692  15888   8212 S   2.6  0.4   0:01.34 php-fpm
+ 8093 daemon    20   0  336692  15888   8212 S   2.6  0.4   0:01.33 php-fpm
+17932 daemon    20   0    8180   1360    544 R   1.7  0.0   0:00.05 stress
+  935 root      20   0 1213656 105304  52204 S   1.0  2.7   0:08.11 dockerd
+ 9891 root      20   0   46204   4504   3748 R   1.0  0.1   0:00.31 top
+  913 root      20   0  961012  41596  23444 S   0.7  1.1   0:00.80 containerd
+   11 root      20   0       0      0      0 I   0.3  0.0   0:00.54 rcu_sched
+ 4610 systemd+  20   0   33100   3812   2392 S   0.3  0.1   0:00.11 nginx
+17935 daemon    20   0    8180    828    532 R   0.3  0.0   0:00.01 stress
+    1 root      20   0  225448   9200   6628 S   0.0  0.2   0:04.86 systemd
+    2 root      20   0       0      0      0 S   0.0  0.0   0:00.00 kthreadd
+    3 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 rcu_gp
+    4 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 rcu_par_gp
+    5 root      20   0       0      0      0 I   0.0  0.0   0:00.13 kworker/0:0-eve
+    6 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 kworker/0:0H-kb
+```
+
+可以看到CPU的总负载很高，但却没有看到占CPU很高的应用
+
+使用pidstat，还是看不出来
+
+```bash
+$ pidstat 1   # 每秒输出一组
+Average:      UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command
+Average:        0        10    0.00    0.12    0.00    0.00    0.12     -  ksoftirqd/0
+Average:        0        11    0.00    0.12    0.00    0.12    0.12     -  rcu_sched
+Average:        0       110    0.00    0.25    0.00    0.00    0.25     -  kworker/u16:3-events_unbound
+Average:        0       808    0.12    0.00    0.00    0.00    0.12     -  thermald
+Average:        0       913    0.00    0.12    0.00    0.00    0.12     -  containerd
+Average:        0       935    0.75    0.50    0.00    0.00    1.25     -  dockerd
+Average:        0      4524    0.37    3.74    0.00    0.00    4.11     -  containerd-shim
+Average:      101      4609    0.75    2.62    0.00    0.87    3.36     -  nginx
+Average:        0      4807    0.12    0.12    0.00    0.37    0.25     -  php-fpm
+Average:        0      4823    0.00    0.12    0.00    0.00    0.12     -  kworker/u16:0-events_unbound
+Average:        1      8067    0.37    2.24    0.00    0.62    2.62     -  php-fpm
+Average:        1      8071    0.50    2.12    0.00    0.50    2.62     -  php-fpm
+Average:        1      8073    0.50    2.12    0.00    0.50    2.62     -  php-fpm
+Average:        1      8085    0.37    2.24    0.00    0.50    2.62     -  php-fpm
+Average:        1      8093    0.25    2.37    0.00    0.50    2.62     -  php-fpm
+Average:        0     13524    1.12    1.49    0.00    0.25    2.62     -  pidstat
+Average:        1     14871    0.50    0.00    0.00    0.00    0.50     -  stress
+Average:        1     14874    0.37    0.00    0.00    0.00    0.37     -  stress
+```
+
+还是看不出来占用CPU高的应用
+
+然后，我们看top输出的信息，发现php-fpm都处理s状态，stress处理于r状态，我们查看stress的信息
+
+```bash
+$ pidstat -p 17935
+Linux 5.4.0-74-generic (heads-Lenovo-Yoga-2-11) 	2021年06月13日 	_x86_64_	(4 CPU)
+
+14时14分27秒   UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command
+```
+
+发现啥也没有，然后我们使用pstree查看stress的父进程 
+
+```bash
+$ pstree | grep stress
+        |                 |         `-php-fpm---sh---stress---stress
+```
+
+可以看到，stress的父进程是php-fpm，然后我们就可以分析源码了，将源码拷贝出来
+
+```bash
+$ docker cp phpfpm:/app .
+$ grep stress -r app
+app/index.php:// fake I/O with stress (via write()/unlink()).
+app/index.php:$result = exec("/usr/local/bin/stress -t 1 -d 1 2>&1", $output, $status);
+```
+
+发现在index.php文件里面调用了stress命令
+
+```php
+$ cat app/index.php
+<?php
+// fake I/O with stress (via write()/unlink()).
+$result = exec("/usr/local/bin/stress -t 1 -d 1 2>&1", $output, $status);
+if (isset($_GET["verbose"]) && $_GET["verbose"]==1 && $status != 0) {
+  echo "Server internal error: ";
+  print_r($output);
+} else {
+  echo "It works!";
+}
+?>
+```
+
+但是，就算是调用了stress命令我们也能够看出是stress命令占用CPU比较高，但实际情况确不是。接着，加一个参数verbose=1
+
+```bash
+$ curl http://192.168.1.226:10000?verbose=1
+Server internal error: Array
+(
+    [0] => stress: info: [7401] dispatching hogs: 0 cpu, 0 io, 0 vm, 1 hdd
+    [1] => stress: FAIL: [7402] (563) mkstemp failed: Permission denied
+    [2] => stress: FAIL: [7401] (394) <-- worker 7402 returned error 1
+    [3] => stress: WARN: [7401] (396) now reaping child worker processes
+    [4] => stress: FAIL: [7401] (400) kill error: No such process
+    [5] => stress: FAIL: [7401] (451) failed run completed in 0s
+)
+```
+
+发现mkstemp failed: Permission denied，原来是没有权限执行stress命令，导致一直在报错，没有真正运行。
+
+然后使用perf工具找出热点函数，看看导致CPU飙高具体是什么原因
+
+```bash
+$ perf record -g 
+$ perf report 
+\Samples: 282K of event 'cycles', Event count (approx.): 91373110412
+  Children      Self  Command          Shared Object               Symbol
++   30.46%    28.49%  stress           libc-2.24.so                [.] random_r
++   21.68%    19.51%  stress           libc-2.24.so                [.] random
++   11.36%     6.09%  stress           libc-2.24.so                [.] rand
+     4.92%     4.92%  stress           stress                      [.] 0x0000000000002efc
++    3.29%     0.00%  php-fpm          [kernel.kallsyms]           [k] entry_SYSCALL_64_after
++    3.28%     0.04%  php-fpm          [kernel.kallsyms]           [k] do_syscall_64
++    3.05%     0.00%  swapper          [kernel.kallsyms]           [k] secondary_startup_64
++    3.05%     0.00%  swapper          [kernel.kallsyms]           [k] cpu_startup_entry
++    3.05%     0.01%  swapper          [kernel.kallsyms]           [k] do_idle
++    2.94%     0.00%  swapper          [kernel.kallsyms]           [k] call_cpuidle
++    2.94%     0.00%  swapper          [kernel.kallsyms]           [k] cpuidle_enter
++    2.93%     0.01%  swapper          [kernel.kallsyms]           [k] cpuidle_enter_state
+     2.79%     2.79%  stress           stress                      [.] 0x0000000000002f06
++    2.76%     2.75%  swapper          [kernel.kallsyms]           [k] intel_idle
+     2.55%     2.55%  stress           stress                      [.] 0x0000000000002eef
+     2.55%     2.55%  stress           stress                      [.] 0x0000000000000e80
+     2.35%     2.35%  stress           stress                      [.] 0x0000000000002ee0
++    2.23%     0.00%  swapper          [kernel.kallsyms]           [k] start_secondary
++    2.14%     0.00%  php-fpm          [unknown]                   [k] 0x6cb6258d4c544155
++    2.14%     0.00%  php-fpm          libc-2.24.so                [.] __libc_start_main
++    1.96%     0.01%  stress           [kernel.kallsyms]           [k] page_fault
+     1.87%     1.87%  stress           stress                      [.] 0x0000000000002f14
+     1.86%     1.86%  stress           stress                      [.] 0x0000000000002f21
+     1.69%     1.69%  stress           stress                      [.] 0x0000000000002f25
++    1.67%     0.01%  stress           [kernel.kallsyms]           [k] do_page_fault
++    1.67%     0.00%  stress           [kernel.kallsyms]           [k] entry_SYSCALL_64_after
++    1.66%     0.05%  stress           [kernel.kallsyms]           [k] do_syscall_64
+Cannot load tips.txt file, please install perf!
+```
+
+发现random函数是random函数，然后修复权限并减少stress的调用就能解决这个问题了
+
+
 
 ### 大量瞬时进程
 
