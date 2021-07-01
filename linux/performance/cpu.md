@@ -567,3 +567,35 @@ echo "It works!"
 ?>
 ```
 
+
+
+### 大量瞬时进程
+
+大量瞬时进程可以使用一个工具：https://github.com/brendangregg/perf-tools/blob/master/execsnoop
+
+```bash
+[root@slave ~]# ./execsnoop
+Tracing exec()s. Ctrl-C to end.
+Instrumenting sys_execve
+   PID   PPID ARGS
+ 29450      0               sh-29450 [000] d... 80931.947422: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29452  29433 gawk -v o=1 -v opt_name=0 -v name= -v opt_duration=0 [...]
+ 29454  29451 cat -v trace_pipe
+ 29453  29450 /usr/local/bin/stress -t 1 -d 1
+ 29455   8445               sh-29455 [001] d... 80931.964506: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29457  29455 /usr/local/bin/stress -t 1 -d 1
+ 29459   8434               sh-29459 [000] d... 80931.967556: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29460  29459 /usr/local/bin/stress -t 1 -d 1
+ 29462   8439               sh-29462 [001] d... 80931.996296: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29463  29462 /usr/local/bin/stress -t 1 -d 1
+ 29466   8434               sh-29466 [001] d... 80932.005191: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29465   8446               sh-29465 [000] d... 80932.008042: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29467  29466 /usr/local/bin/stress -t 1 -d 1
+ 29470   8441               sh-29470 [001] d... 80932.011944: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29471   8445               sh-29471 [001] d... 80932.012629: execsnoop_sys_execve: (SyS_execve+0x0/0x30)
+ 29472  29470 /usr/local/bin/stress -t 1 -d 1
+ 29473  29471 /usr/local/bin/stress -t 1 -d 1
+ 29469  29465 /usr/local/bin/stress -t 1 -d 1
+ ....
+```
+
