@@ -5,7 +5,7 @@
 首先，创建一个BeanUtil类
 
 ```java
-package com.tuya.sigmax.demo.java.starter;
+package com.tuya.demo.java.starter;
 
 import org.springframework.context.ConfigurableApplicationContext;
 
