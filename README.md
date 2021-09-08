@@ -32,6 +32,10 @@
 
 #### 	[Effective GO](golang/effective.md)
 
+## Java
+
+#### [JavaBean](java/bean.md)
+
 ## 操作系统
 
 操作系统就像是生活中的水电系统，是基础设施
@@ -105,7 +109,6 @@
 # Git 
 
 #### [Git 配置文件](git/config.md) 
-
 
 
 
