@@ -141,3 +141,15 @@ Can I set the above configuration? (type 'yes' to accept): yes
 "bar"
 ```
 
+设置密码
+
+登陆每个节点，执行以下操作：
+
+```shell
+./redis-cli -c -p 7000 
+config set masterauth passwd123 
+config set requirepass passwd123 
+config rewrite 
+```
+
+注意，-c表示的是cluster模式

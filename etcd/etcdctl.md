@@ -6,3 +6,13 @@ github地址：https://github.com/etcd-io/etcd/tree/main/etcdctl
 
  export ETCDCTL_API=3
 
+
+
+## etcdct常用命令
+
+查看所key
+
+```shell
+$ etcdctl --endpoints=http://localhost:2379 ls /
+```
+
