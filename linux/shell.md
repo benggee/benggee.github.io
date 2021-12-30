@@ -32,6 +32,23 @@ grub2-editenv list    # 查看内核版本
 
 然后会进入/usr/lib/systemd/system
 
+
+
+### 常用命令
+
+```shell
+# 查看进程
+$ ps aux | grep "procceser"
+# 查看端口
+$ netstat -anpl | grep "8080"
+$ lsof -i -P | grep "8080"  # 可以在mac下使用
+
+# 只要结果的某一列
+$ docker ps -a | awk '{print $3}'
+```
+
+
+
 # SHELL脚本的规则
 
 #! /bin/bash  
