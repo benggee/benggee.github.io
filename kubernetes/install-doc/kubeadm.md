@@ -67,6 +67,7 @@ $ swapoff -a
 $ sed -i '/swap/s/^\(.*\)$/#\1/g' /etc/fstab
 # 关闭selinux
 $ setenforce 0
+$ sed -i 's/enforcing/disabled/g' /etc/selinux/config   
 # 关闭dnsmasq(否则可能导致docker容器无法解析域名)
 $ service dnsmasq stop && systemctl disable dnsmasq
 ```
@@ -176,83 +177,6 @@ $ systemctl enable kubelet && systemctl start kubelet
 
 
 
-### 1.8 准备配置文件
-
-```shell
-$ cd ~ && git clone https://github.com/seepre/kubernetes-kubeadm.git
-# 看看git内容
-$ ls -l kubernetes-ha-kubeadm
-addons/
-configs/
-scripts/
-init.sh
-global-configs.properties
-```
-
-#### 文件说明
-
-- **addons**
-
-> kubernetes的插件，比如calico和dashboard。
-
-- **configs**
-
-> 包含了部署集群过程中用到的各种配置文件。
-
-- **scripts**
-
-> 包含部署集群过程中用到的脚本，如keepalive检查脚本。
-
-- **global-configs.properties**
-
-> 全局配置，包含各种易变的配置内容。
-
-- **[init.sh](http://init.sh/)**
-
-> 初始化脚本，配置好global-config之后，会自动生成所有配置文件。
-
-生成配置
-
-这里会根据大家各自的环境生成kubernetes部署过程需要的配置文件。
-在每个节点上都生成一遍，把所有配置都生成好，后面会根据节点类型去使用相关的配置。
-
-```bash
-# cd到之前下载的git代码目录
-$ cd kubernetes-ha-kubeadm
-
-# 编辑属性配置（根据文件注释中的说明填写好每个key-value）
-$ vi global-config.properties
-
-# 生成配置文件，确保执行过程没有异常信息
-$ ./init.sh
-
-# 查看生成的配置文件，确保脚本执行成功
-$ find target/ -type f
-```
-
-> **执行init.sh常见问题：**
->
-> 1. Syntax error: “(” unexpected
->
-> - bash版本过低，运行：bash -version查看版本，如果小于4需要升级
-> - 不要使用 sh init.sh的方式运行（sh和bash可能不一样哦）
->
-> 1. global-config.properties文件填写错误，需要重新生成
->    再执行一次./init.sh即可，不需要手动删除target
-
-
-
-注意：
-
-如果是阿里云的机器，需要做以下两件事：
-
-1. global-config.properties里的虚拟Ip配成其中一个master的公网ip就可以了
-2. 设置安全规则，放开端口号
-
-
-
-
-
 ## 2. 集群部署
 
 ### 2.1 部署keepalived-apiserver高可用（阿里云不支持，可以跳过此步骤）
@@ -301,10 +225,7 @@ $ ip a
 ### 2.2 部署主节点
 
 ```shell
-# 准备配置文件
-$ scp target/configs/kubeadm-config.yaml <user>@<node-ip>:~
-# ssh到第一个主节点，执行kubeadm初始化系统（注意保存最后打印的加入集群的命令）
-$ kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
+$ kubeadm init --apiserver-advertise-address=172.16.236.80 --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.23.4 --service-cidr=10.1.0.0/16 --pod-network-cidr=10.244.0.0/16
 
 # copy kubectl配置（上一步会有提示）
 $ mkdir -p ~/.kube
@@ -316,23 +237,14 @@ $ kubectl get pods --all-namespaces
 # **备份init打印的join命令**
 ```
 
-### 2.3 部署网络插件calico
+### 2.3 部署网络插件flannel
 
 我们使用calico官方的安装方式来部署。
 
 ```bash
-# 创建目录（在配置了kubectl的节点上执行）
-$ mkdir -p /etc/kubernetes/addons
+$ kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
-# 上传calico配置到配置好kubectl的节点（一个节点即可）
-$ scp target/addons/calico* <user>@<node-ip>:/etc/kubernetes/addons/
-
-# 部署calico
-$ kubectl apply -f /etc/kubernetes/addons/calico-rbac-kdd.yaml
-$ kubectl apply -f /etc/kubernetes/addons/calico.yaml
-
-# 查看状态
-$ kubectl get pods -n kube-system
+# 参考：https://github.com/flannel-io/flannel
 ```
 
 ### 2.4 加入其它master节点
@@ -364,7 +276,26 @@ $ journalctl -f
 $ kubectl get nodes
 ```
 
+### 2.6 检查健康
 
+```
+$ kubectl get cs
+Warning: v1 ComponentStatus is deprecated in v1.19+
+NAME                 STATUS      MESSAGE                                                                                       ERROR
+scheduler            Unhealthy   Get "http://127.0.0.1:10251/healthz": dial tcp 127.0.0.1:10251: connect: connection refused  
+controller-manager   Healthy     ok                                                                                           
+etcd-0               Healthy     {"health":"true","reason":""}
+```
+
+如果出现上面的情况，解决办法如下：
+
+cd /etc/kubernetes/manifests
+
+vi kube-scheduler.yaml
+
+将 --port=0 这一行删除
+
+systemctl restart kubelet
 
 ## 3. 集群测试
 
