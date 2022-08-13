@@ -40,6 +40,7 @@
 ** [Kubernetes](/cloud-native/kubernetes/)
 ** [Docker](/cloud-native/docker/)
 ** [配置管理](/cloud-native/conf/)
+** [go-zero](/cloud-native/go-zero/)
 
 * [嵌入式&单片机](/embedded/)
 
@@ -47,6 +48,8 @@
 ** [vim](/work-desktop/vim/)
 ** [git](/work-desktop/git/)
 ** [Mac](/work-desktop/mac/)
+** [GDB](/work-desktop/gdb/)
+** [Makefile](https://mp.weixin.qq.com/s/wqJubLeRwZhTkNsGM6DbIA)
 
 
 * [认知提升](/)
