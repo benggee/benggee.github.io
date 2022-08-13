@@ -1,4 +1,3 @@
-* [首页](/)
 * [数据结构算法](/datastruct/)
 
 * [网络与协议](/network-protocol/)
