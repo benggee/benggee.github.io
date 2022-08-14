@@ -49,6 +49,7 @@
 ** [Mac](/work-desktop/mac/)
 ** [GDB](/work-desktop/gdb/)
 ** [Makefile](https://mp.weixin.qq.com/s/wqJubLeRwZhTkNsGM6DbIA)
+** [编码问题](/work-desktop/code/)
 
 
 * [认知提升](/)
