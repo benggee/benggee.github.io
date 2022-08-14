@@ -41,7 +41,7 @@
     port 80 and tcp[((tcp[12:1]&0xf0)>>2):4] = 0x47455420
        注意：47455420是ASCII码的16进制，表示 “GET”
        TCP报头可能不只20字节，data offset提示了承载数据的偏移，但它以4字节为单位
-![image.png](https://note.youdao.com/yws/res/18208/WEBRESOURCEfaaebe9f208a7cecbd900d2f049f6967)
+![image.jpeg](/_media/tcpdump-001.jpeg)
 
 
 # 文件操作
