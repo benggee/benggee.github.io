@@ -22,7 +22,7 @@
 ** [Python](/programing-language/python/)
 ** [C/C++](/programing-language/c-plus-plus/)
 ** [Rust](/programing-language/rust/)
-** [Jave](/programing-language/java/)
+** [Java](/programing-language/java/)
 
 * [设计模式](/design-pattern/)
 
