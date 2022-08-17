@@ -3,7 +3,7 @@
 我懂你的温柔，你不懂我的二进制！
 
 
-#### 记住唯一域名：[www.benggee.com](www.benggee.com)
+#### 记住唯一域名：[www.benggee.com](http://www.benggee.com)
 
 
 #### 如何使用这个站点？
