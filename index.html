@@ -15,12 +15,26 @@
       name: '程序员班吉',
       repo: '',
       loadSidebar: true,
-      logo: '/_media/logo.png'
-    }
+      logo: '/_media/logo.png',
+      plugins: [
+   		 function(hook) {
+      		var footer = [
+        		'<hr/>',
+        		'<footer>',
+        		'<span><a href="https://benggee.com">程序员班吉</a> &copy;2022 &nbsp. &nbsp</span>',
+        		'<span> Proudly published with <a href="https://github.com/docsifyjs/docsify" target="_blank">docsify</a> &nbsp.&nbsp </span>',
+				'<span><a href="https://beian.miit.gov.cn/" style="font-size:80%;color:#939393;" target="_blank"> 鄂ICP备20001545号-2 </a></span>',
+        		'</footer>'
+      		].join('');
+
+      		hook.afterEach(function(html) {
+        		return html + footer;
+      		});
+    	 }
+  	  ]
+	};
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-
-  <a href="https://beian.miit.gov.cn/" target="_blank">鄂ICP备20001545号</a>
 </body>
 </html>
