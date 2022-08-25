@@ -14,6 +14,22 @@ Mac下
 
 ## 1. vim模式
 
+![image.gif](/_media/vim-master.gif)
+
+![image.gif](/_media/vim-edit.gif)
+
+![image.gif](/_media/vim-operator.gif)
+
+![image.gif](/_media/vim-yank.gif)
+
+![image.gif](/_media/vim-searching.gif)
+
+![image.gif](/_media/vim-marks.gif)
+
+![image.gif](/_media/vim-various-motions.gif)
+
+![image.gif](/_media/vim-various-commands.gif)
+
 
 
 ## 2. 移动
