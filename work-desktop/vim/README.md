@@ -167,30 +167,75 @@ Mac下
 ## 12. 配置
 
 ```shell
-set enc=utf-8
-set tabstop=4 
-// 不兼容vi
-set nocompatible 
-// 加载vim默认配置
-source $VIMRUNTIME/vimrc_example.vim
-
-// 关闭备份
+set nocompatible
+set backspace=2
+syntax on
+set tabstop=4
+set autoindent
+set nu!
 set nobackup
-// 撤销文件自定义目录，防止在当前目录下产生不必要的文件
-set undodir=~/.vim/undodir  
-// 撤销文件目录不存在需要创建
-if !isdirectory(&undodir) 
-    call mkdir(&undodir, 'p', 0700)
+set scrolloff=1
+set undodir=~/.vim/undodir
+
+if !isdirectory(&undodir)
+	call mkdir(&undodir, 'p', 0700)
 endif
 
-// 表示满足以下条件时响应鼠标事件
-// 1.图形界面正在运行
-// 2.终端是xterm兼容，并且不是Mac
-if has('mouse') 
-    if has('gui_running') || (&term =~ 'xterm' && !has('mac')) 
-        set mouse=a 
-    else 
-        set mouse=nvi 
-    endif
+
+let g:go_version_warning=0
+
+if has('mouse')
+	if has('gui_running') || (&term =~ 'xterm' && !has('mac'))
+		set mouse=a
+	else
+		set mouse=nvi
+	endif
+endif
+
+if exists('g:loaded_minpac')
+  " Minpac is loaded.
+    call minpac#init()
+	call minpac#add('k-takata/minpac', {'type': 'opt'})
+	
+	" Other plugins
+	call minpac#add('tpope/vim-eunuch')
+	call minpac#add('yegappan/mru')
+	call minpac#add('preservim/nerdtree')
+endif
+
+if has('eval')
+	" Minpac commands
+	command! PackUpdate packadd minpac | source $MYVIMRC | call minpac#update()
+	command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
+	command! PackStatus packadd minpac | source $MYVIMRC | call minpac#status()
+endif
+
+
+if !has('gui_running')
+  " 设置文本菜单
+    if has('wildmenu')
+	    set wildmenu
+		set cpoptions-=<
+		set wildcharm=<C-Z>
+		nnoremap <F10>      :emenu <C-Z>
+		inoremap <F10> <C-O>:emenu <C-Z>
+	endif
+endif
+
+if !has('patch-8.0.210')
+	" 进入插入模式时启用括号粘贴模式
+	let &t_SI .= "\<Esc>[?2004h"
+	" 退出插入模式时停用括号粘贴模式
+	let &t_EI .= "\<Esc>[?2004l"
+	" 见到<Esc>[200~就调用XTermPasteBegin
+	inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+
+	function! XTermPasteBegin()
+		" 设置使用<Esc>[201~ 关闭粘贴模式
+		set pastetoggle=<Esc>[201~
+		" 开启粘贴模式
+		set paste
+		return ""
+	endfunction
 endif
 ```
