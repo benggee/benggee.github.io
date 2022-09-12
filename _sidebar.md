@@ -15,7 +15,8 @@
 ** [防火墙](/linux/firewall.md)
 ** [CMake](/linux/cmake-install.md)
 ** [AWK](/linux/awk.md)
-** [文本处理](/linux/text-handle.md)
+** [sed](/linux/sed.md)
+** [查找与匹配](/linux/grep-find.md)
 ** [Linux性能优化](/linux/performance/)
 
 * [编程语言](/)
