@@ -1,36 +1,49 @@
-# sed的使用
+# sed快速上手
 
-## sed的两种形式
+**sed的基本工作模式：**
 
-\> stdout | sed  [option] "pattern command" > sed [option] "pattern command"  file
+- 将文件以行为单位读取到内存(模式空间)
+- 使用sed的每个脚本对该行进行操作
+- 处理完之后输出该行
 
-## option
 
-**-n     只打印模式匹配行**
 
-**-e     直接在命令行进行sed编辑, 默认选项, 可以显示-e 指定多个**
+**sed的两种形式**
 
-**-f      编辑动作保存在文件中，指定文件执行**
+- stdout | sed  [option] "pattern command" 
 
-**-r      支持扩展正则表达式**
+- sed [option] "pattern command"  file
 
-**-i      直接修改文件内容**
 
-## pattern
 
-**10command                       #匹配到第10行**
+**option**
 
-**10,20command                    #匹配从第10行开始，到第20行结束**
+- -n     只打印模式匹配行
 
-**10,+5command                    #匹配从第10行开始，到第16行结束**
+- -e     直接在命令行进行sed编辑, 默认选项, 可以显示-e 指定多个
 
-**/pattern1/command               #匹配到pattern1的行**
+- -f      编辑动作保存在文件中，指定文件执行
 
-**/pattern1/,/pattern2/command    #匹配pattern1开始的行到pattern2开始的行结束**
+- -r      支持扩展正则表达式
 
-**10,/pattern1/command            #匹配从第10行开始到pattern1的行结束**
+- -i      直接修改文件内容
 
-**/pattern1/,10command            #匹配到pattern1的行开始到第10行匹配结束**
+**pattern**
+
+- 10command                       #匹配到第10行
+
+- 10,20command                    #匹配从第10行开始，到第20行结束
+
+- 10,+5command                    #匹配从第10行开始，到第16行结束
+
+- /pattern1/command               #匹配到pattern1的行
+
+- /pattern1/,/pattern2/command    #匹配pattern1开始的行到pattern2开始的行结束
+
+- 10,/pattern1/command            #匹配从第10行开始到pattern1的行结束
+
+- /pattern1/,10command            #匹配到pattern1的行开始到第10行匹配结束
+
 
 **pattern示例：**
 
@@ -54,9 +67,7 @@
 
 ## sed中的编辑命令
 
-### **查询** 
-
-**p    打印**
+**p 打印**
 
 ```shell
 # 1. 打印passwd中第20行的内容 
@@ -75,17 +86,18 @@
 > sed -n '/\/bin\/bash/,5p'  /etc/passwd 
 ```
 
-### 增加
+**追加**
 
-​    **a   行后追加**
+- ​    a   行后追加
 
-​    **i    行前追加**
+- ​    i    行前追加
 
-​    **r    外部文件读入，行后追加**
+- ​    r    外部文件读入，行后追加
 
-​    **w   匹配行写入外部文件** 
+- ​    w   匹配行写入外部文件 
 
-**（1） a    append** 
+
+**a  - append** 
 
 ```shell
 # 1. passwd文件第10行后面追加“Add Line Behind” 
@@ -96,7 +108,7 @@
 > sed -i "/\/bin\/bash/a Insert Line For /bin/bash Behind" passwd
 ```
 
-**（2）i**  
+**i   - insert**  
 
 ```shell
 # 1. passwd文件匹配到以yarn开头的行，在匹配行前面加上“Add Line Before” 
@@ -105,7 +117,7 @@
 > sed -i 'i Insert Line Before Every Line' passwd
 ```
 
-**（3）r**
+**r**
 
 ```shell
 # 1. 将fstab文件的内容追加到passwd文件的第20行后面 
@@ -114,7 +126,7 @@
 > sed -i '/\/bin\/bash/r /etc/inittab' passwd
 ```
 
-**（4）w**
+**w**
 
 ```shell
 # 1. 将passwd文件匹配到/bin/bash的行追加到/tmp/sed.txt文件中 
@@ -123,23 +135,22 @@
 > sed -i '10,/^hdfs/w /tmp/sed-1.txt' passwd
 ```
 
-### 删除
+**删除**
 
- **d   删除**
+-  d   删除
 
-**1d**
+  - 1d
 
-**5,10d**
+  - 5,10d
 
-**10,+10d**
+  - 10,+10d
+  - /pattern1/d
 
-**/pattern1/d**
+  - /pattern1/,/pattern2/d
 
-**/pattern1/,/pattern2/d**
+  - /pattern1/,20d
 
-**/pattern1/,20d**
-
-**15,/pattern1/d**
+  - 15,/pattern1/d
 
 ```shell
 # 1. 删除passwd中的第15行 
@@ -162,33 +173,33 @@
 > sed -i 's/^[^#]/\*&/g' nginx.conf
 ```
 
-### 修改
 
-​    **s/old/new      # 将行内第一个old替换为new**
 
-​    **s/old/new/g        # 将行内全部的old替换为new** 
+**替换**
 
-​    **s/old/new/2        # 替换前2个old为new**
+- ​    s/old/new           # 将行内第一个old替换为new
 
-​    **s/old/new/2g      # 从第2个开始替换**
+- ​    s/old/new/g        # 将行内全部的old替换为new（全局替换）
 
-​    **s/old/new/ig       # 将行内oid全部替换为new, 忽略大小写**
+- ​    s/old/new/2        # 替换前2个old为new
 
-修改用户总结：
+- ​    s/old/new/2g      # 从第2个开始替换
 
-**（1）1s/old/new/**
+- ​    s/old/new/ig       # 将行内oid全部替换为new, 忽略大小写**
 
-**（2）5,10s/old/new/**
 
-**（3）10,+10s/old/new/**
+修改用法总结：
 
-**（4）/pattern1/s/old/new**
+1. 1s/old/new/
+2. 5,10s/old/new/
+3. 10,+10s/old/new/
+4. /pattern1/s/old/new
 
-**（5）/pattern1/,/pattern2/s/old/new/**
+5. /pattern1/,/pattern2/s/old/new/
 
-**（6）/pattern1/,20s/old/new**
+6. /pattern1/,20s/old/new
 
-**（7）15,/pattern1/s/old/new/**
+7. 15,/pattern1/s/old/new/
 
 ```shell
 # 1. 修改/passwd中第1行中第1个root为ROOT 
@@ -205,6 +216,21 @@
 > sed -i '15,/^yarn/s/bin/BIN/g' passwd
 ```
 
+
+
+**正则引用分组**
+
+```
+// cfile 内容：axyzb
+sed -r 's/(a.*b)/\1/' cfile      // 结果 axyzb   \1表示引用第一个分组
+
+sed -r 's/(a.*b)/\1\1/' cfile    // 结果 axyzbaxyzb
+
+sed -r 's/(a.*b)/\1:\1/' cfile   // 结果 axyzb:axyzb
+```
+
+
+
 **显示行号：**
 
 **=** 
@@ -215,7 +241,7 @@
 
 
 
-### 反向引用
+**反向引用**
 
 **&和\1**
 
@@ -240,5 +266,97 @@
 
 ```shell
 > /bin/bash str1=root str2=nginx sed -i 's/'$str1'/'$str2'/g' test.txt 
+```
+
+
+
+**其它命令**
+
+退出命令
+
+```
+sed  10q filename        // 只打印10行
+sed  -n 1,10p filename   // 会匹配所有行，只是不打印
+```
+
+
+
+## 分组
+
+**寻址可以匹配多条命令**
+
+```
+/regular/{s/old/new/;s/old/new/}
+```
+
+
+
+## 脚本文件
+
+```
+sed -f sedscript filename
+```
+
+
+
+## 多行模式
+
+**多行模式场景**
+
+例如XML/JSON格式的配置文件
+
+a.txt内容如下：
+
+```
+hel
+lo
+```
+
+多行示例
+
+```
+sed 'N;s/hel\nlo/!!!/' a.txt    
+sed 'N;s/hel.lo/!!!/' a.txt
+```
+
+
+
+**多行模式命令**
+
+- N  将下一行加入到模式空间
+- D   删除模式空间中的第一个字符到第一个换行符
+- P   打印模式空间中的第一个字符到第一个换行符
+
+
+
+## 保持空间
+
+**什么是保持空间**
+
+保持空间是一种多行操作模式，它会在模式空间之外新创建一块内存空间，命令如下：
+
+- h和H 将模式空间内容存放到保持空间
+- g 和G 将保持空间内容取出到模式空间
+- x 交换模式空间和保持空间内容
+
+```
+// 第一行放到保持空间，除了第一行之外从保持空间读入到模式空间，X交换，最后一行不交换，p输出
+cat -n /etc/passwd | head -6 | sed -n '1h;1!G;$1x;$p'
+
+cat -n /etc/passwd | head -6 | sed -n "G;h;$p"
+
+cat -n /etc/passwd | head -6 | sed -n "1!G;h;$p"
+
+cat -n /etc/passwd | head -6 | sed '1!G;h;$!d'
+```
+
+
+
+### TIPS
+
+生成多行文本
+
+```
+seq 1 10000 > lines.txt
 ```
 
