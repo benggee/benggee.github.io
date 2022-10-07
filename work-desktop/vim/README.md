@@ -10,6 +10,24 @@ Mac下
 系统偏好 > 键盘 > 修饰键 > Capslock或者中/英文：Escape/Control
 ```
 
+Windows下
+
+将下面代码保存为 capslock2esc.reg：
+
+```
+Windows Registry Editor Version 5.00
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
+"Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,01,00,3a,00,00,00,00,00
+```
+
+注：上面不是互换，如果要互换，则用下面代码：
+
+```
+Windows Registry Editor Version 5.00
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
+"Scancode Map"=hex:00,00,00,00,00,00,00,00,03,00,00,00,3a,00,01,00,01,00,3a,00,00,00,00,00
+```
+
 
 
 ## 1. vim模式
