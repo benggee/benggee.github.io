@@ -1,2 +1,7 @@
+# 配置管理
 
-- [Apollo配置](/cloud-native/conf/usage.md)
+分布式系统中的配置管理是保证服务灵活性和可维护性的关键。
+
+## 配置中心
+
+- [Apollo 配置中心](/cloud-native/conf/usage.md) - 携程开源的分布式配置中心

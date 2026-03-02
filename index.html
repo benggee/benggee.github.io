@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>Document</title>
+  <title>程序员班吉 - 程序员的知识库</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Description">
+  <meta name="description" content="程序员班吉 - 一个面向程序员的个人知识库，涵盖数据结构算法、网络协议、Linux、编程语言、云原生、中间件等核心技术领域">
+  <meta name="keywords" content="程序员,知识库,编程,开发,学习,技术文档,Golang,Python,Linux,Kubernetes,Docker">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 </head>
@@ -16,15 +17,37 @@
       repo: '',
       loadSidebar: true,
       logo: '/_media/benggee.png',
+      maxLevel: 4,
+      subMaxLevel: 3,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: '搜索',
+        noData: '没有找到结果',
+        depth: 6
+      },
+      copyCode: {
+        buttonText: '复制',
+        errorText: '错误',
+        successText: '已复制'
+      },
+      pagination: {
+        previousText: '上一页',
+        nextText: '下一页'
+      },
       plugins: [
-   		 function(hook) {
+   		 function(hook, vm) {
       		var footer = [
         		'<hr/>',
-        		'<footer>',
-        		'<span><a href="https://benggee.com">程序员班吉</a> &copy;2022 &nbsp. &nbsp</span>',
-        		'<span> Proudly published with <a href="https://github.com/docsifyjs/docsify" target="_blank">docsify</a> &nbsp.&nbsp </span>',
-				'<span><a href="https://beian.miit.gov.cn/" style="font-size:80%;color:#939393;" target="_blank"> 鄂ICP备20001545号-2 </a></span>',
-				'<span><img style="margin-left: 10px; height:14px" src="_media/gongan.png"/><a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010602001781" style="font-size:80%;color:#939393;" target="_blank">川公网安备 51010602001781号</a></span>',
+        		'<footer style="text-align:center;color:#999;font-size:14px;padding:20px 0;">',
+        		'<p><a href="https://benggee.com" style="color:#999;text-decoration:none;">程序员班吉</a> &copy; 2025</p>',
+        		'<p>Proudly published with <a href="https://github.com/docsifyjs/docsify" target="_blank" style="color:#42b983;">docsify</a></p>',
+        		'<p style="font-size:12px;margin-top:10px;">',
+        		'<a href="https://beian.miit.gov.cn/" target="_blank" style="color:#999;text-decoration:none;">鄂ICP备20001545号-2</a>',
+        		' | ',
+        		'<img src="_media/gongan.png" style="width:14px;vertical-align:middle;margin-right:4px;"/>',
+        		'<a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=51010602001781" style="color:#999;text-decoration:none;">川公网安备 51010602001781号</a>',
+        		'</p>',
         		'</footer>'
       		].join('');
 
@@ -37,5 +60,11 @@
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <!-- Search Plugin -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <!-- Copy Code Plugin -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+  <!-- Pagination Plugin -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
 </body>
 </html>
